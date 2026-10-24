@@ -5,6 +5,7 @@
   "compatibility_date": "2026-10-24",
   "containers": [
     {
+      "name": "omniroute-hostless1-omniroutecontainer",
       "class_name": "OmniRouteContainer",
       "image": "docker.io/diegosouzapw/omniroute:latest",
       "max_instances": 1
