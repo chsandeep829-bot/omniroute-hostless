@@ -1,0 +1,4 @@
+# Hostless app configuration
+# Keep runtime settings in the Hostless dashboard unless its documentation
+# specifies additional supported keys for this file.
+
