@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "omniroute-hostless1",
+  "name": "omniroute-hostless",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-24",
   "containers": [
