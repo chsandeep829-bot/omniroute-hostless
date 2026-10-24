@@ -1,0 +1,27 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "omniroute-hostless",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-24",
+  "containers": [
+    {
+      "class_name": "OmniRouteContainer",
+      "image": "docker.io/diegosouzapw/omniroute:latest",
+      "max_instances": 1
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "OMNIROUTE",
+        "class_name": "OmniRouteContainer"
+      }
+    ]
+  },
+  "exports": {
+    "OmniRouteContainer": {
+      "type": "durable-object",
+      "storage": "sqlite"
+    }
+  }
+}
