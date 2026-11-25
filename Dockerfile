@@ -1,11 +1,15 @@
-FROM diegosouzapw/omniroute:latest
+FROM diegosouzapw/omniroute:3.8.54
 
-# The upstream image runs OmniRoute as the unprivileged "node" user.
-# Prepare the database directory at image-build time so node can create
-# SQLite files and temporary files there when no host volume overrides it.
+# OmniRoute writes its SQLite database and provider configuration under DATA_DIR.
+# The existing Hostless persistent disk is mounted at /data, so point the app
+# there instead of the image default /app/data.
 USER root
-RUN mkdir -p /app/data \
-    && chown -R node:node /app/data
+RUN mkdir -p /data && chown -R node:node /data
 
-# Keep the application running without root privileges.
+ENV DATA_DIR=/data \
+    PORT=20128 \
+    HOSTNAME=0.0.0.0 \
+    OMNIROUTE_MEMORY_MB=768 \
+    REQUIRE_API_KEY=true
+
 USER node
