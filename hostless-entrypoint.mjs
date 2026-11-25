@@ -5,14 +5,21 @@ import { mkdirSync, realpathSync } from "node:fs";
 const dataDir = process.env.DATA_DIR || "/app/data";
 mkdirSync(dataDir, { recursive: true });
 
-// Hostless disks can be mounted root-owned, hiding the ownership baked into
-// the Docker image. Repair the mounted directory before dropping to UID 1000.
+// Hostless disks can be mounted root-owned, hiding image-layer ownership.
+// Fix the mounted directory before dropping privileges.
 const resolvedDataDir = realpathSync(dataDir);
 execFileSync("chown", ["-R", "1000:1000", resolvedDataDir], { stdio: "inherit" });
 
-const command = process.argv[2] || "node";
-const args = process.argv.slice(3);
-const child = spawn(command, args, {
+// Keep OmniRoute's upstream permission guard: it applies NODE_OPTIONS and
+// the configured base-path check, then execs the actual server as UID 1000.
+const args = [
+  "--reuid=1000",
+  "--regid=1000",
+  "--init-groups",
+  "/app/check-permissions.sh",
+  ...process.argv.slice(2),
+];
+const child = spawn("setpriv", args, {
   stdio: "inherit",
   env: {
     ...process.env,
@@ -20,8 +27,6 @@ const child = spawn(command, args, {
     USER: "node",
     LOGNAME: "node",
   },
-  uid: 1000,
-  gid: 1000,
 });
 
 for (const signal of ["SIGTERM", "SIGINT", "SIGHUP"]) {
@@ -34,8 +39,5 @@ child.on("error", (error) => {
 });
 
 child.on("exit", (code, signal) => {
-  if (signal) {
-    process.exit(128);
-  }
-  process.exit(code ?? 1);
+  process.exit(signal ? 128 : (code ?? 1));
 });
