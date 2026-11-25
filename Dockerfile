@@ -1,12 +1,17 @@
 FROM diegosouzapw/omniroute:3.8.54
 
-# OmniRoute writes its SQLite database and provider configuration under DATA_DIR.
-# The existing Hostless persistent disk is mounted at /data, so point the app
-# there instead of the image default /app/data.
+# Support either common Hostless disk mount path:
+# - /app/data (OmniRoute's documented default)
+# - /data (used by the earlier Hostless setup)
+# If the disk is mounted at /app/data it overlays this symlink; if mounted at
+# /data the symlink forwards OmniRoute's default data directory to that disk.
 USER root
-RUN mkdir -p /data && chown -R node:node /data
+RUN mkdir -p /data \
+    && chown -R node:node /data \
+    && rm -rf /app/data \
+    && ln -s /data /app/data
 
-ENV DATA_DIR=/data \
+ENV DATA_DIR=/app/data \
     PORT=20128 \
     HOSTNAME=0.0.0.0 \
     OMNIROUTE_MEMORY_MB=768 \
